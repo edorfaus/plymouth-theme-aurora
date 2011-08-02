@@ -1,0 +1,228 @@
+# Plymouth splash script that draws a moving aurora on a starfield
+# Copyright (C) 2011 Frode Austvik
+# License: GNU GPL version 2 or later
+
+rays.image = Image("ray-green.png");
+rays.wantedCount = 300;
+rays.zIndex = -10;
+rays.minOpacity = 0.5;
+rays.maxOpacity = 1;
+
+logo.display = 1;
+logo.zIndex = 0;
+logo.fadeFrequency = 0; // In Hz, 0 means no fading
+logo.minOpacity = 0.3;
+logo.maxOpacity = 1; // Also used as initial opacity
+if (logo.display) {
+	//logo.image = Image("special://logo");
+	logo.image = Image("logo.png");
+}
+
+stars.display = 1;
+stars.wantedCount = 100;
+stars.zIndex = -100;
+stars.minOpacity = 0.2;
+stars.maxOpacity = 0.7;
+if (stars.display) {
+	stars.image=Image.Text(".", 1, 1, 1, 1, "Fixed");
+	stars.image=stars.image.Scale(
+		stars.image.GetWidth(),
+		stars.image.GetHeight()/2
+	);
+}
+
+Window.SetBackgroundTopColor(0.1, 0.1, 0.2);
+Window.SetBackgroundBottomColor(0, 0, 0.1);
+
+// ---- End of settings ---- //
+
+if (logo.display) {
+	logo.sprite=Sprite(logo.image);
+	logo.opacityAngle=0;
+	logo.sprite.SetOpacity(logo.maxOpacity);
+	logo.sprite.SetPosition(
+		Window.GetX()+Window.GetWidth()/2-logo.image.GetWidth()/2,
+		Window.GetY()+Window.GetHeight()/2-logo.image.GetHeight()/2,
+		logo.zIndex
+	);
+}
+
+if (stars.display) {
+	for(i=0;i<stars.wantedCount;i++) {
+		stars[i]=Sprite(stars.image);
+		stars[i].SetPosition(
+			Window.GetX()+Window.GetWidth()*Math.Random(),
+			Window.GetY()+Window.GetHeight()*Math.Random(),
+			stars.zIndex
+		);
+		local.opacity=Math.Random();
+		opacity*=(stars.maxOpacity-stars.minOpacity);
+		opacity+=stars.minOpacity;
+		stars[i].SetOpacity(opacity);
+	}
+}
+
+yTopMin=Window.GetHeight()/16;
+yTopMax=Window.GetHeight()/4;
+yBottomMin=Window.GetHeight()*3/4;
+yBottomMax=yBottomMin+Window.GetHeight()*4/6;
+
+rays.currentCount=0;
+
+fun checkLineCount() {
+	local.i=0;
+	if (rays.currentCount<rays.wantedCount) {
+		if (rays.currentCount<1) {
+			local.yTop=Math.Random()*Window.GetHeight()/4;
+			local.yBottom=Math.Random()*Window.GetHeight()/8+Window.GetHeight()*3/4;
+			rays[0].x=Math.Random()*Window.GetWidth()/16;
+			rays[0].yTop=yTop;
+			rays[0].yBottom=yBottom;
+			rays[0].sprite=Sprite(rays.image.Scale(
+				rays.image.GetWidth(), yBottom-yTop
+			));
+			rays[0].sprite.SetPosition(
+				Window.GetX()+Math.Int(rays[0].x),
+				Window.GetY()+Math.Int(rays[0].yTop),
+				rays.zIndex
+			);
+			local.opacity=Math.Random();
+			opacity*=(rays.maxOpacity-rays.minOpacity);
+			opacity+=rays.minOpacity;
+			rays[0].sprite.SetOpacity(opacity);
+			rays.currentCount++;
+		}
+		for(i=rays.currentCount;i<rays.wantedCount;i++) {
+			local.yTop=rays[i-1].yTop+(Math.Random()-0.5)*3;
+			local.yBottom=rays[i-1].yBottom+(Math.Random()-0.5);
+			if (yTop<yTopMin) yTop=yTopMin;
+			if (yTop>yTopMax) yTop=yTopMax;
+			if (yBottom<yBottomMin) yBottom=yBottomMin;
+			if (yBottom>yBottomMax) yBottom=yBottomMax;
+			rays[i].x=rays[i-1].x+Math.Random();
+			rays[i].yTop=yTop;
+			rays[i].yBottom=yBottom;
+			rays[i].sprite=Sprite(rays.image.Scale(
+				rays.image.GetWidth(), yBottom-yTop
+			));
+			rays[i].sprite.SetPosition(
+				Window.GetX()+Math.Int(rays[i].x),
+				Window.GetY()+Math.Int(rays[i].yTop),
+				rays.zIndex
+			);
+			local.opacity=Math.Random();
+			opacity*=(rays.maxOpacity-rays.minOpacity);
+			opacity+=rays.minOpacity;
+			rays[i].sprite.SetOpacity(opacity);
+			rays.currentCount++;
+		}
+		// If the highest x is outside the canvas, or before the midpoint,
+		// scale all the x values so that it is not.
+		local.scaleFactor=1;
+		if (rays[rays.currentCount-1].x<Window.GetWidth()/4) {
+			scaleFactor=Window.GetWidth()/4;
+			if (scaleFactor>rays[0].x+rays.currentCount/2) {
+				scaleFactor=rays[0].x+rays.currentCount/2;
+			}
+			if (rays[rays.currentCount-1].x>=scaleFactor) {
+				scaleFactor=1;
+			}
+		}
+		if (rays[rays.currentCount-1].x>Window.GetWidth()) {
+			scaleFactor=Window.GetWidth();
+		}
+		if (scaleFactor!=1) {
+			scaleFactor/=rays[rays.currentCount-1].x;
+			for(i=0;i<rays.currentCount;i++) {
+				rays[i].x *= scaleFactor;
+				rays[i].sprite.SetX(
+					Window.GetX()+Math.Int(rays[i].x)
+				);
+			}
+		}
+	}
+}
+
+fun moveLines() {
+	// TODO: move the y positions too, not just x
+	local.width=Window.GetWidth();
+	local.newX=rays[0].x+Math.Random()-0.45;
+	if (newX<0) newX=0;
+	if (newX>width/2) {
+		newX=width/2;
+	}
+	rays[0].x=newX;
+	rays[0].sprite.SetX(Window.GetX()+Math.Int(newX));
+	local.iMax=rays.currentCount-1;
+	newX=rays[iMax].x+(Math.Random()-0.45);
+	if (newX>width) {
+		newX=width;
+	}
+	local.minX=width/4;
+	if (minX>rays[0].x+rays.currentCount/2)
+		minX=rays[0].x+rays.currentCount/2;
+	if (newX<minX) {
+		newX=minX;
+	}
+	rays[iMax].x=newX;
+	rays[iMax].sprite.SetX(Window.GetX()+Math.Int(newX));
+	local.i=1;local.prevX=0;local.nextX=0;
+	newX=rays[0].x;
+	for(i=1;i<iMax;i++) {
+		prevX=newX;
+		newX=rays[i].x;
+		nextX=rays[i+1].x;
+		newX+=(Math.Random()-0.45);
+		if (Math.Int(newX)>Math.Int(prevX+1)) {
+			newX=prevX+1;
+		}
+		if (Math.Int(newX)<Math.Int(prevX-1)) {
+			newX=prevX-1;
+		}
+		if (Math.Int(newX)>Math.Int(nextX+1)) {
+			newX=nextX+1;
+		}
+		if (Math.Int(newX)<Math.Int(nextX-1)) {
+			newX=nextX-1;
+		}
+		rays[i].x=newX;
+		rays[i].sprite.SetX(Window.GetX()+Math.Int(newX));
+	}
+}
+
+// This variable is used to limit the refresh rate, because this script is
+// rather heavy (it has hundreds of sprites, most with opacity, many moving).
+doRefresh=0;
+
+fun refresh_callback () {
+	if (logo.fadeFrequency>0) {
+		// This assumes that refresh will be called ~ 50 times per second
+		logo.opacityAngle += ((2*3.14)/50)*logo.fadeFrequency;
+	}
+	doRefresh++;
+	if (doRefresh>=0) {
+		doRefresh=-20;
+		if (rays.currentCount<rays.wantedCount) {
+			checkLineCount();
+		}
+		moveLines();
+		if (logo.fadeFrequency>0) {
+			local.opacity = (Math.Cos(logo.opacityAngle)+1)/2;
+			opacity *= logo.maxOpacity - logo.minOpacity;
+			opacity += logo.minOpacity;
+			logo.sprite.SetOpacity(opacity);
+		}
+	}
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+progress.prevTime=0;
+
+fun boot_progress_callback(time, bootProgress) {
+	if (progress.prevTime+0.15<time) {
+		progress.prevTime=time;
+		doRefresh=0;
+	}
+}
+Plymouth.SetBootProgressFunction(boot_progress_callback);
+

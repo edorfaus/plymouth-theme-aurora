@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Aurora
+Description=Aurora on starfield
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/aurora
+ScriptFile=/usr/share/plymouth/themes/aurora/aurora.script
