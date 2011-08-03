@@ -115,17 +115,14 @@ fun checkLineCount() {
 			rays[i].sprite.SetOpacity(opacity);
 			rays.currentCount++;
 		}
-		// If the highest x is after the midpoint of the canvas,
-		// scale all the x values so that it is not.
-		if (rays[rays.currentCount-1].x+rays.width>Window.GetWidth()/2) {
-			local.scaleFactor=Window.GetWidth()/2-rays.width;
-			scaleFactor/=rays[rays.currentCount-1].x+rays.width;
-			for(i=0;i<rays.currentCount;i++) {
-				rays[i].x *= scaleFactor;
-				rays[i].sprite.SetX(
-					Window.GetX()+Math.Int(rays[i].x)
-				);
-			}
+		// Scale all the x values so the aurora takes up half the screen.
+		local.scaleFactor=Window.GetWidth()/2-rays.width;
+		scaleFactor/=rays[rays.currentCount-1].x+rays.width;
+		for(i=0;i<rays.currentCount;i++) {
+			rays[i].x *= scaleFactor;
+			rays[i].sprite.SetX(
+				Window.GetX()+Math.Int(rays[i].x)
+			);
 		}
 	}
 }
