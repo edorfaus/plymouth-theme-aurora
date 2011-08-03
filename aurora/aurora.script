@@ -3,9 +3,10 @@
 # License: GNU GPL version 2 or later
 
 rays.image = Image("ray-green.png");
-rays.wantedCount = 300;
+rays.width = 3;//rays.image.GetWidth();
+rays.wantedCount = 100;
 rays.zIndex = -10;
-rays.minOpacity = 0.5;
+rays.minOpacity = 0.75;
 rays.maxOpacity = 1;
 
 logo.display = 1;
@@ -78,9 +79,7 @@ fun checkLineCount() {
 			rays[0].x=Math.Random()*Window.GetWidth()/16;
 			rays[0].yTop=yTop;
 			rays[0].yBottom=yBottom;
-			rays[0].sprite=Sprite(rays.image.Scale(
-				rays.image.GetWidth(), yBottom-yTop
-			));
+			rays[0].sprite=Sprite(rays.image.Scale(rays.width, yBottom-yTop));
 			rays[0].sprite.SetPosition(
 				Window.GetX()+Math.Int(rays[0].x),
 				Window.GetY()+Math.Int(rays[0].yTop),
@@ -99,12 +98,10 @@ fun checkLineCount() {
 			if (yTop>yTopMax) yTop=yTopMax;
 			if (yBottom<yBottomMin) yBottom=yBottomMin;
 			if (yBottom>yBottomMax) yBottom=yBottomMax;
-			rays[i].x=rays[i-1].x+Math.Random();
+			rays[i].x=rays[i-1].x+rays.width*Math.Random();
 			rays[i].yTop=yTop;
 			rays[i].yBottom=yBottom;
-			rays[i].sprite=Sprite(rays.image.Scale(
-				rays.image.GetWidth(), yBottom-yTop
-			));
+			rays[i].sprite=Sprite(rays.image.Scale(rays.width, yBottom-yTop));
 			rays[i].sprite.SetPosition(
 				Window.GetX()+Math.Int(rays[i].x),
 				Window.GetY()+Math.Int(rays[i].yTop),
@@ -119,20 +116,20 @@ fun checkLineCount() {
 		// If the highest x is outside the canvas, or before the midpoint,
 		// scale all the x values so that it is not.
 		local.scaleFactor=1;
-		if (rays[rays.currentCount-1].x<Window.GetWidth()/4) {
-			scaleFactor=Window.GetWidth()/4;
-			if (scaleFactor>rays[0].x+rays.currentCount/2) {
-				scaleFactor=rays[0].x+rays.currentCount/2;
+		if (rays[rays.currentCount-1].x+rays.width<Window.GetWidth()/4) {
+			scaleFactor=Window.GetWidth()/4-rays.width;
+			if (scaleFactor>rays[0].x+rays.width*rays.currentCount/2) {
+				scaleFactor=rays[0].x+rays.width*rays.currentCount/2;
 			}
 			if (rays[rays.currentCount-1].x>=scaleFactor) {
 				scaleFactor=1;
 			}
 		}
-		if (rays[rays.currentCount-1].x>Window.GetWidth()) {
-			scaleFactor=Window.GetWidth();
+		if (rays[rays.currentCount-1].x+rays.width>Window.GetWidth()) {
+			scaleFactor=Window.GetWidth()-rays.width;
 		}
 		if (scaleFactor!=1) {
-			scaleFactor/=rays[rays.currentCount-1].x;
+			scaleFactor/=rays[rays.currentCount-1].x+rays.width;
 			for(i=0;i<rays.currentCount;i++) {
 				rays[i].x *= scaleFactor;
 				rays[i].sprite.SetX(
@@ -148,19 +145,20 @@ fun moveLines() {
 	local.width=Window.GetWidth();
 	local.newX=rays[0].x+Math.Random()-0.45;
 	if (newX<0) newX=0;
-	if (newX>width/2) {
-		newX=width/2;
+	if (newX+rays.width>width/2) {
+		newX=width/2-rays.width;
 	}
 	rays[0].x=newX;
 	rays[0].sprite.SetX(Window.GetX()+Math.Int(newX));
 	local.iMax=rays.currentCount-1;
 	newX=rays[iMax].x+(Math.Random()-0.45);
-	if (newX>width) {
-		newX=width;
+	if (newX+rays.width>width) {
+		newX=width-rays.width;
 	}
 	local.minX=width/4;
-	if (minX>rays[0].x+rays.currentCount/2)
-		minX=rays[0].x+rays.currentCount/2;
+	if (minX>rays[0].x+rays.width*rays.currentCount/2) {
+		minX=rays[0].x+rays.width*rays.currentCount/2;
+	}
 	if (newX<minX) {
 		newX=minX;
 	}
@@ -173,16 +171,16 @@ fun moveLines() {
 		newX=rays[i].x;
 		nextX=rays[i+1].x;
 		newX+=(Math.Random()-0.45);
-		if (Math.Int(newX)>Math.Int(prevX+1)) {
+		if (Math.Int(newX)>Math.Int(prevX+rays.width)) {
 			newX=prevX+1;
 		}
-		if (Math.Int(newX)<Math.Int(prevX-1)) {
+		if (Math.Int(newX)<Math.Int(prevX-rays.width)) {
 			newX=prevX-1;
 		}
-		if (Math.Int(newX)>Math.Int(nextX+1)) {
+		if (Math.Int(newX)>Math.Int(nextX+rays.width)) {
 			newX=nextX+1;
 		}
-		if (Math.Int(newX)<Math.Int(nextX-1)) {
+		if (Math.Int(newX)<Math.Int(nextX-rays.width)) {
 			newX=nextX-1;
 		}
 		rays[i].x=newX;
