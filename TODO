@@ -1,7 +1,6 @@
 (Note: some of this is not so much TODO as just possible ideas)
 
 * make it use less CPU without looking too much worse
-	- widen the ray image so we can use fewer of it
 	- check how hard it would be to implement a custom splash plugin (in C)
 
 * improve how it looks
