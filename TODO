@@ -4,7 +4,6 @@
 	- check how hard it would be to implement a custom splash plugin (in C)
 
 * improve how it looks
-	- multiple independent aurora groups
 	- add movement in the Y positions
 	- faster movement in the X positions
 	- give an indication of how far along in the boot process we are
