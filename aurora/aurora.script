@@ -37,6 +37,8 @@ Window.SetBackgroundBottomColor(0, 0, 0.1);
 
 // ---- End of settings ---- //
 
+progress.bootProgress=0;
+
 if (logo.display) {
 	logo.sprite=Sprite(logo.image);
 	logo.opacityAngle=0;
@@ -131,6 +133,7 @@ fun checkLineCount() {
 fun moveLines() {
 	// TODO: move the y positions too, not just x
 	local.maxX=Window.GetWidth()/2-rays.width;
+	local.startX=Window.GetX()+progress.bootProgress*Window.GetWidth()/2;
 	for(local.i=0;i<rays.currentCount;i++) {
 		local.newX=rays[i].x+Math.Random()-0.5;
 		if (Math.Int(newX)<0) {
@@ -140,7 +143,7 @@ fun moveLines() {
 			newX=maxX;
 		}
 		rays[i].x=newX;
-		rays[i].sprite.SetX(Window.GetX()+Math.Int(newX));
+		rays[i].sprite.SetX(startX+Math.Int(newX));
 	}
 }
 
@@ -173,6 +176,7 @@ Plymouth.SetRefreshFunction(refresh_callback);
 progress.prevTime=0;
 
 fun boot_progress_callback(time, bootProgress) {
+	progress.bootProgress=bootProgress;
 	if (progress.prevTime+0.15<time) {
 		progress.prevTime=time;
 		doRefresh=0;

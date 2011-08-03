@@ -6,8 +6,6 @@
 * improve how it looks
 	- add movement in the Y positions
 	- faster movement in the X positions
-	- give an indication of how far along in the boot process we are
-		- have the aurora move from left to right due to that instead of random
 
 * implement the password prompt and similar dialogs
 	- see how the example script does it
