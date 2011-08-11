@@ -37,7 +37,11 @@ Window.SetBackgroundBottomColor(0, 0, 0.1);
 
 // ---- End of settings ---- //
 
-progress.bootProgress=0;
+if (Plymouth.GetMode()=="shutdown" || Plymouth.GetMode()=="suspend") {
+	progress.bootProgress=1;
+} else {
+	progress.bootProgress=0;
+}
 
 if (logo.display) {
 	logo.sprite=Sprite(logo.image);
@@ -173,7 +177,12 @@ Plymouth.SetRefreshFunction(refresh_callback);
 progress.prevTime=0;
 
 fun boot_progress_callback(time, bootProgress) {
-	progress.bootProgress=bootProgress;
+	local.mode=Plymouth.GetMode();
+	if (mode=="shutdown" || mode=="suspend") {
+		progress.bootProgress=1-bootProgress;
+	} else {
+		progress.bootProgress=bootProgress;
+	}
 	if (progress.prevTime+0.15<time) {
 		progress.prevTime=time;
 		doRefresh=0;
