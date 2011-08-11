@@ -47,11 +47,14 @@ if (logo.display) {
 	logo.sprite=Sprite(logo.image);
 	logo.opacityAngle=0;
 	logo.sprite.SetOpacity(logo.maxOpacity);
-	logo.sprite.SetPosition(
-		Window.GetX()+Window.GetWidth()/2-logo.image.GetWidth()/2,
-		Window.GetY()+Window.GetHeight()/2-logo.image.GetHeight()/2,
-		logo.zIndex
-	);
+	logo.Center=fun() {
+		logo.sprite.SetPosition(
+			Window.GetX()+Window.GetWidth()/2-logo.image.GetWidth()/2,
+			Window.GetY()+Window.GetHeight()/2-logo.image.GetHeight()/2,
+			logo.zIndex
+		);
+	};
+	logo.Center();
 }
 
 if (stars.display) {
@@ -189,4 +192,144 @@ fun boot_progress_callback(time, bootProgress) {
 	}
 }
 Plymouth.SetBootProgressFunction(boot_progress_callback);
+
+# -------- dialog -------- #
+
+dialog.setup=fun() {
+	if (dialog.setup.done) {
+		return;
+	}
+	
+	local.box;
+	local.lock;
+	local.entry;
+	local.prompt;
+	local.text;
+	
+	dialog.box=box;
+	dialog.lock=lock;
+	dialog.entry=entry;
+	dialog.prompt=prompt;
+	dialog.text=text;
+	
+	dialog.bullets.image=Image("bullet.png");
+
+	box.image=Image("box.png");
+	lock.image=Image("lock.png");
+	entry.image=Image("entry.png");
+
+	box.sprite=Sprite(box.image);
+	box.x=Window.GetX()+Window.GetWidth()/2-box.image.GetWidth()/2;
+	box.y=Window.GetY()+Window.GetHeight()/2-box.image.GetHeight()/2;
+	box.z=10000;
+	box.sprite.SetPosition(box.x, box.y, box.z);
+	
+	lock.sprite=Sprite(lock.image);
+	lock.x=box.x+box.image.GetWidth()/2
+		-(lock.image.GetWidth()+entry.image.GetWidth())/2
+	;
+	lock.y=box.y+box.image.GetHeight()/2-lock.image.GetHeight()/2;
+	lock.z=box.z+1;
+	lock.sprite.SetPosition(lock.x, lock.y, lock.z);
+	
+	entry.sprite=Sprite(entry.image);
+	entry.x=lock.x+lock.image.GetWidth();
+	entry.y=box.y+box.image.GetHeight()/2-entry.image.GetHeight()/2;
+	entry.z=box.z+1;
+	entry.sprite.SetPosition(entry.x, entry.y, entry.z);
+	
+	dialog.top=Math.Min(box.y, lock.y, entry.y);
+	
+	prompt.sprite=Sprite();
+	prompt.SetText=fun(text) {
+		local.prompt=dialog.prompt;
+		local.box=dialog.box;
+		prompt.image=Image.Text(text, 1, 1, 1);
+		prompt.sprite.SetImage(prompt.image);
+		prompt.sprite.SetPosition(
+			box.x+(box.image.GetWidth()-prompt.image.GetWidth())/2,
+			box.y+box.image.GetHeight()+2,
+			box.z+1
+		);
+	};
+	
+	text.sprite=Sprite();
+	text.SetText=fun(string) {
+		local.text=dialog.text;
+		local.entry=dialog.entry;
+		text.image=Image.Text(string, 0, 0, 0);
+		text.sprite.SetImage(text.image);
+		text.sprite.SetPosition(
+			entry.x+2,
+			entry.y+(entry.image.GetHeight()-text.image.GetHeight())/2,
+			entry.z+1
+		);
+	};
+	
+	dialog.sprites[0]=box.sprite;
+	dialog.sprites[1]=lock.sprite;
+	dialog.sprites[2]=entry.sprite;
+	dialog.sprites[3]=prompt.sprite;
+	dialog.sprites[4]=text.sprite;
+	
+	dialog.setup.done=1;
+};
+
+dialog.Hide=fun() {
+	if (dialog.setup.done) {
+		local.i;
+		for (i=0;dialog.sprites[i];i++) {
+			dialog.sprites[i].SetOpacity(0);
+		}
+		for (i=0;dialog.bullets[i];i++) {
+			dialog.bullets[i].SetOpacity(0);
+		}
+	}
+	logo.Center();
+};
+
+dialog.Show=fun(prompt, bulletCount, text) {
+	if (!prompt) prompt="";
+	if (!text) text="";
+	
+	dialog.setup();
+	dialog.prompt.SetText(prompt);
+	dialog.text.SetText(text);
+	
+	local.logoY=dialog.top-logo.image.GetHeight();
+	if (logoY>Window.GetY()) {
+		logoY=(logoY-Window.GetY())/2+Window.GetY();
+	}
+	logo.sprite.SetY(logoY);
+	
+	local.i;
+	for (i=0;dialog.sprites[i];i++) {
+		dialog.sprites[i].SetOpacity(1);
+	}
+	
+	local.bullets=dialog.bullets;
+	local.entry=dialog.entry;
+	for(i=0;i<bulletCount;i++) {
+		if (!bullets[i]) {
+			bullets[i]=Sprite(bullets.image);
+			bullets[i].SetPosition(
+				entry.x+2+(bullets.image.GetWidth()+2)*i,
+				entry.y+(entry.image.GetHeight()-bullets.image.GetHeight())/2,
+				dialog.entry.z+1
+			);
+		}
+		bullets[i].SetOpacity(1);
+	}
+	for(i=i;bullets[i];i++) {
+		bullets[i].SetOpacity(0);
+	}
+};
+
+Plymouth.SetDisplayNormalFunction(dialog.Hide);
+Plymouth.SetDisplayPasswordFunction(fun(prompt, bulletCount) {
+	dialog.Show(prompt, bulletCount, "");
+});
+Plymouth.SetDisplayQuestionFunction(fun(prompt, text) {
+	dialog.Show(prompt, 0, text);
+});
 
