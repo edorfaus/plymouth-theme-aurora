@@ -187,9 +187,11 @@ fun boot_progress_callback(time, bootProgress) {
 		progress.bootProgress=bootProgress;
 	}
 	if (progress.prevTime+0.15<time) {
+		fadetext.Update(time);
 		progress.prevTime=time;
 		doRefresh=0;
 	}
+	fadetext.lastKnownTime=time;
 }
 Plymouth.SetBootProgressFunction(boot_progress_callback);
 
@@ -332,4 +334,59 @@ Plymouth.SetDisplayPasswordFunction(fun(prompt, bulletCount) {
 Plymouth.SetDisplayQuestionFunction(fun(prompt, text) {
 	dialog.Show(prompt, 0, text);
 });
+
+# -------- status messages -------- #
+
+fadetext.lastKnownTime=0;
+
+fadetext.Update=fun(time) {
+	local.i;
+	for(i=0;fadetext.list[i];i++) {
+		if (fadetext.list[i].timeout<0) {
+			// The timeout is set negative until here, for two reasons:
+			// - we don't really have the current time in the Add method
+			// - this ensures the message is not hidden before it's displayed
+			fadetext.list[i].timeout=time-fadetext.list[i].timeout;
+		}
+		if (fadetext.list[i].active && fadetext.list[i].timeout<time) {
+			local.opacity=fadetext.list[i].timeout+1-time;
+			if (opacity<=0) {
+				fadetext.list[i].sprite.SetOpacity(0);
+				fadetext.list[i].active=0;
+				fadetext.list[i].sprite=undefined;
+				fadetext.list[i].image=undefined;
+			} else {
+				fadetext.list[i].sprite.SetOpacity(opacity);
+			}
+		}
+	}
+};
+
+fadetext.Add=fun(text, timeout) {
+	if (!text || text=="") return;
+	fadetext.list[-1].image=Image.Text(text, 1, 1, 1);
+	fadetext.list[-1].sprite=Sprite(fadetext.list[-1].image);
+	fadetext.list[-1].active=1;
+	fadetext.list[-1].timeout=-timeout; // Negative for a reason, see Update
+	fadetext.list[-1].sprite.SetPosition(
+		Window.GetX(),
+		Window.GetY()+Window.GetHeight(),
+		5000
+	);
+	local.height=fadetext.list[-1].image.GetHeight();
+	local.i;
+	// Find the first unused position
+	for(i=0;fadetext.list[i] && fadetext.list[i].active;i++) {}
+	// Move everything up
+	for(i=i;i>=0;i--) {
+		fadetext.list[i]=fadetext.list[i-1];
+		fadetext.list[i].sprite.SetY(fadetext.list[i].sprite.GetY()-height);
+	}
+	fadetext.list[-1]=undefined;
+};
+
+Plymouth.SetUpdateStatusFunction(fun(text){ fadetext.Add(text, 5); });
+Plymouth.SetMessageFunction(fun(text){ fadetext.Add(text, 10); });
+
+Plymouth.SetRootMountedFunction(fun(){ fadetext.Add("Root (re)mounted.", 2); });
 
