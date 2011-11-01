@@ -1,0 +1,30 @@
+This is a Plymouth theme (based on the script module) that shows a moving
+aurora on a starfield, along with the system's logo.
+
+This currently includes and uses a logo for AuroraOS[1] since that's what the
+theme was built for and the system I was testing on hadn't set the system logo
+for Plymouth (since it didn't use Plymouth itself). However, the code to use
+the system logo is in there, just commented out, and should be obvious.
+
+There's quite a few settings at the top of the script, that can be used for
+tuning the theme for your system - I've tried to minimize CPU usage while still
+having it look decent, as it's meant (at least in part) for netbooks.
+
+To install it, simply place the aurora dir in the Plymouth themes dir (usually
+/usr/share/plymouth/themes/ or /lib/plymouth/themes/ ).
+
+
+On Ubuntu, the theme also needs to be added to alternatives before it can be
+selected, using this command:
+
+sudo update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/aurora/aurora.plymouth 100
+
+Then, you can choose which theme to use with these commands:
+
+sudo update-alternatives --config default.plymouth
+sudo update-initramfs -u
+
+
+
+
+[1] See http://www.auroraos.org/
