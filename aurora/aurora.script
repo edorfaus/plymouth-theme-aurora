@@ -3,11 +3,11 @@
 # License: GNU GPL version 2 or later
 
 rays.image = Image("ray-green.png");
-rays.width = 3;//rays.image.GetWidth();
-rays.wantedCount = 100;
+rays.width = rays.image.GetWidth();
+rays.wantedCount = 35;
 rays.zIndex = -10;
-rays.minOpacity = 0.75;
-rays.maxOpacity = 1;
+rays.minOpacity = 0.2;
+rays.maxOpacity = 0.4;
 
 logo.display = 1;
 logo.zIndex = 0;
