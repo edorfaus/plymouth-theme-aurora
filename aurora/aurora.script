@@ -101,8 +101,8 @@ fun checkLineCount() {
 			rays.currentCount++;
 		}
 		for(i=rays.currentCount;i<rays.wantedCount;i++) {
-			local.yTop=rays[i-1].yTop+(Math.Random()-0.5)*3;
-			local.yBottom=rays[i-1].yBottom+(Math.Random()-0.5);
+			local.yTop=rays[i-1].yTop+(Math.Random()-0.5)*20;
+			local.yBottom=rays[i-1].yBottom+(Math.Random()-0.5)*10;
 			if (yTop<yTopMin) yTop=yTopMin;
 			if (yTop>yTopMax) yTop=yTopMax;
 			if (yBottom<yBottomMin) yBottom=yBottomMin;
