@@ -8,6 +8,9 @@ rays.wantedCount = 35;
 rays.zIndex = -10;
 rays.minOpacity = 0.2;
 rays.maxOpacity = 0.4;
+rays.initialFadeInChance = 0.7;
+rays.fadeInOutChance = 0.11;
+rays.fadeSpeed = 0.03;
 
 logo.display = 1;
 logo.zIndex = 0;
@@ -95,8 +98,15 @@ fun checkLineCount() {
 				rays.zIndex
 			);
 			local.opacity=Math.Random();
-			opacity*=(rays.maxOpacity-rays.minOpacity);
-			opacity+=rays.minOpacity;
+			if (opacity<rays.initialFadeInChance) {
+				opacity=Math.Random();
+				opacity*=(rays.maxOpacity-rays.minOpacity);
+				opacity+=rays.minOpacity;
+			} else {
+				opacity=0;
+			}
+			rays[0].targetOpacity=opacity;
+			rays[0].currentOpacity=opacity;
 			rays[0].sprite.SetOpacity(opacity);
 			rays.currentCount++;
 		}
@@ -117,8 +127,15 @@ fun checkLineCount() {
 				rays.zIndex
 			);
 			local.opacity=Math.Random();
-			opacity*=(rays.maxOpacity-rays.minOpacity);
-			opacity+=rays.minOpacity;
+			if (opacity<rays.initialFadeInChance) {
+				opacity=Math.Random();
+				opacity*=(rays.maxOpacity-rays.minOpacity);
+				opacity+=rays.minOpacity;
+			} else {
+				opacity=0;
+			}
+			rays[i].targetOpacity=opacity;
+			rays[i].currentOpacity=opacity;
 			rays[i].sprite.SetOpacity(opacity);
 			rays.currentCount++;
 		}
@@ -148,6 +165,33 @@ fun moveLines() {
 		}
 		rays[i].x=newX;
 		rays[i].sprite.SetX(startX+Math.Int(newX));
+		local.opacity=rays[i].currentOpacity;
+		if (Math.Random()<rays.fadeInOutChance) {
+			if (rays[i].targetOpacity==0) {
+				local.newOpacity=Math.Random();
+				newOpacity*=(rays.maxOpacity-rays.minOpacity);
+				newOpacity+=rays.minOpacity;
+				rays[i].targetOpacity=newOpacity;
+			} else {
+				rays[i].targetOpacity=0;
+			}
+		}
+		if (opacity>rays[i].targetOpacity) {
+			opacity-=rays.fadeSpeed;
+			if (opacity<rays[i].targetOpacity) {
+				opacity=rays[i].targetOpacity;
+			}
+		}
+		else if (opacity<rays[i].targetOpacity) {
+			opacity+=rays.fadeSpeed;
+			if (opacity>rays[i].targetOpacity) {
+				opacity=rays[i].targetOpacity;
+			}
+		}
+		if (opacity!=rays[i].currentOpacity) {
+			rays[i].currentOpacity=opacity;
+			rays[i].sprite.SetOpacity(opacity);
+		}
 	}
 }
 
