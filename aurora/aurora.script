@@ -8,7 +8,7 @@ rays.wantedCount = 35;
 rays.zIndex = -10;
 rays.minOpacity = 0.2;
 rays.maxOpacity = 0.4;
-rays.initialFadeInChance = 0.7;
+rays.initialFadeInChance = 0.5;
 rays.fadeInOutChance = 0.11;
 rays.fadeSpeed = 0.03;
 
